@@ -15,19 +15,20 @@
 # the vlues for the inverse (and also for its defined-in environment)
 
 makeCacheMatrix <- function(x = matrix()) {
-  xinv <- NULL
-  print(environment())
-  evn <- environment()
-  print(parent.env(evn))
-  set <- function(y) {
+  xinv <- NULL   #initalize the variable to store teh inverse
+  print(environment())  #return info about environment to user ... here's where inverse will be cached
+  evn <- environment()  # store that environemt
+  print(parent.env(evn))  # print the parent of the environment 
+  set <- function(y) {   # function to set the value of x if (x can be created empty, or can be modified)
     x <<- y
-    xinv <<- NULL
+    xinv <<- NULL  #set the inverse to NULL because this is new data
   }
-  get <- function() x
-  setinverse <- function(inverse) xinv <<- inverse
-  getinverse <- function() xinv
-  getevn<- function() environment()
-  list(set = set, get = get,
+  get <- function() x  #retrieve value of x
+  setinverse <- function(inverse) xinv <<- inverse  #function that actually persists the inverse
+                                                    # uses "<<-" to assign value in definig environment
+  getinverse <- function() xinv   #retrieves inverse from persisted variable
+  getevn<- function() environment()   #retrieves info about environment
+  list(set = set, get = get,       #retruns back to calling command the info about the created functions
        setinverse = setinverse,
        getinverse = getinverse,
        getevn = getevn)
@@ -42,13 +43,13 @@ makeCacheMatrix <- function(x = matrix()) {
 
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
-    xinv <- x$getinverse()
-    if(!is.null(xinv)) {
-      message("getting cached data")
-      return(xinv)
+    xinv <- x$getinverse()              #looks for invverse in cached variable
+    if(!is.null(xinv)) {                #if found, then it will return that cached value
+      message("getting cached data")    #indicate that cached value was used
+      return(xinv)                      #return inverse
     }
-    data <- x$get()
-    xinv <- solve(data, ...)
-    x$setinverse(xinv)
-    xinv
+    data <- x$get()               #if not found in cache then get the data so we can solve here
+    xinv <- solve(data, ...)      #solve for the inverse  
+    x$setinverse(xinv)            #save the result into the cache for next time
+    xinv                          #return the inverse to calling function
 }
